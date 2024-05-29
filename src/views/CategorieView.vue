@@ -100,7 +100,7 @@ function ajouteCategorie() {
  * @param entityRef l'URI de l'entité à supprimer
  */
 function deleteEntity(entityRef) {
-    doAjaxRequest(entityRef, { method: "DELETE", headers: { "Accept": "application/json" }})
+    doAjaxRequest(entityRef, { method: "DELETE", headers: { "Accept": "application/json" } })
         .then(chargeCategories)
         .catch(showError);
 }
