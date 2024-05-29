@@ -55,8 +55,10 @@ function chargeProduits() {
     doAjaxRequest("/api/produits?sort=nom,asc&page=" + page.value + "&size=" + taille.value)
         .then((json) => {
             listeProduits.value = json._embedded.produits;
-
+            console.log("chargeProduit " + page.value)
             console.log(listeProduits.value)
+            nbpageTotales.value = json.page.totalPages;
+            pageactuelle.value = json.page.number;
         })
         .catch((error) => {
             console.log(error);
@@ -64,19 +66,28 @@ function chargeProduits() {
 }
 
 function vaDebut() {
-
+    page.value = 0;
+    chargeProduits();
 }
 
 function vaPrecedent() {
+    if (page.value > 0) {
+        page.value = page.value - 1;
+        chargeProduits();
+    }
 
 }
 
 function vaSuivant() {
-
+    if (page.value + 1 < nbpageTotales.value) {
+        page.value = page.value + 1;
+        chargeProduits();
+    }
 }
 
 function vaFin() {
-
+    page.value = nbpageTotales.value - 1;
+    chargeProduits();
 }
 onMounted(chargeProduits);
 </script>
