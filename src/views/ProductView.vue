@@ -23,6 +23,20 @@
                     <td>{{ produit.unitesEnStock }}</td>
                     <td>{{ produit.unitesCommandees }}</td>
                 </tr>
+                <tr>
+                    <td>
+                        <button> debut </button>
+                    </td>
+                    <td>
+                        <button> prec </button>
+                    </td>
+                    <td>
+                        <button> suiv </button>
+                    </td>
+                    <td>
+                        <button> Fin </button>
+                    </td>
+                </tr>
             </table>
         </div>
     </main>
