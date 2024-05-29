@@ -6,6 +6,7 @@
         <div>
             <table>
                 <caption>Liste des produits</caption>
+                <h2>Page : {{ pageactuelle + 1 }} / {{ nbpageTotales }}</h2>
                 <tr>
                     <th>nom</th>
                     <th>prix</th>
@@ -25,16 +26,16 @@
                 </tr>
                 <tr>
                     <td>
-                        <button> debut </button>
+                        <button @click="vaDebut" :disabled="pageactuelle == 0"> debut </button>
                     </td>
                     <td>
-                        <button> prec </button>
+                        <button @click="vaPrecedent"> prec </button>
                     </td>
                     <td>
-                        <button> suiv </button>
+                        <button @click="vaSuivant"> suiv </button>
                     </td>
                     <td>
-                        <button> Fin </button>
+                        <button @click="vaFin" :disabled="nbpageTotales == pageactuelle + 1"> Fin </button>
                     </td>
                 </tr>
             </table>
@@ -45,16 +46,37 @@
 import { doAjaxRequest } from '../api';
 import { reactive, onMounted, ref } from "vue";
 let listeProduits = ref([]);
+let nbpageTotales = ref([]);
+let pageactuelle = ref([]);
+let page = ref(0);
+let taille = ref(5);
 
 function chargeProduits() {
-    doAjaxRequest("/api/produits?sort=nom,asc")
+    doAjaxRequest("/api/produits?sort=nom,asc&page=" + page.value + "&size=" + taille.value)
         .then((json) => {
             listeProduits.value = json._embedded.produits;
+
             console.log(listeProduits.value)
         })
         .catch((error) => {
             console.log(error);
         });
+}
+
+function vaDebut() {
+
+}
+
+function vaPrecedent() {
+
+}
+
+function vaSuivant() {
+
+}
+
+function vaFin() {
+
 }
 onMounted(chargeProduits);
 </script>
