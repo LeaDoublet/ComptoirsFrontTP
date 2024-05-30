@@ -4,7 +4,7 @@
             <h1> Les Categories de produits</h1>
         </div>
         <div>
-            <select v-model="selected">
+            <select v-model="selected" @change="chargeProduitsCategorie">
                 <option disabled value="">Choisissez une catégorie</option>
                 <option v-for="categorie in listeCategories" :key="categorie.code" :value="categorie.code">
                     {{ categorie.libelle }}
@@ -12,7 +12,6 @@
             </select>
             <table>
                 <caption>Les produits</caption>
-                <h2>Page : {{ pageactuelle + 1 }} / {{ nbpageTotales }}</h2>
                 <tr>
                     <th>nom</th>
                     <th>prix</th>
@@ -30,80 +29,22 @@
                     <td>{{ produit.unitesEnStock }}</td>
                     <td>{{ produit.unitesCommandees }}</td>
                 </tr>
-                <tr>
-                    <td>
-                        <button @click="vaDebut" :disabled="pageactuelle == 0"> debut </button>
-                    </td>
-                    <td>
-                        <button @click="vaPrecedent"> prec </button>
-                    </td>
-                    <td>
-                        <button @click="vaSuivant"> suiv </button>
-                    </td>
-                    <td>
-                        <button @click="vaFin" :disabled="nbpageTotales == pageactuelle + 1"> Fin </button>
-                    </td>
-                </tr>
             </table>
         </div>
     </main>
 </template>
 <script setup>
 import { doAjaxRequest } from '../api';
-import { reactive, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 let listeProduits = ref([]);
-let nbpageTotales = ref([]);
-let pageactuelle = ref([]);
-let page = ref(0);
-let taille = ref(5);
 let listeCategories = ref([]);
 let selected = ref("");
 
-function chargeProduits() {
-    doAjaxRequest("/api/produits?sort=nom,asc&page=" + page.value + "&size=" + taille.value)
-        .then((json) => {
-            listeProduits.value = json._embedded.produits;
-            console.log("chargeProduit " + page.value)
-            console.log(listeProduits.value)
-            nbpageTotales.value = json.page.totalPages;
-            pageactuelle.value = json.page.number;
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+function showError(error) {
+    console.log("Erreur : status %d", error.status);
+    console.log(error.body);
+    alert(error.message);
 }
-
-function vaDebut() {
-    page.value = 0;
-    chargeProduits();
-}
-
-function vaPrecedent() {
-    if (page.value > 0) {
-        page.value = page.value - 1;
-        chargeProduits();
-    }
-
-}
-
-function vaSuivant() {
-    if (page.value + 1 < nbpageTotales.value) {
-        page.value = page.value + 1;
-        chargeProduits();
-    }
-}
-
-function vaFin() {
-    page.value = nbpageTotales.value - 1;
-    chargeProduits();
-}
-
-// Pour réinitialiser le formulaire
-const categorieVide = {
-    libelle: "",
-    description: ""
-};
-
 
 function chargeCategories() {
     // Appel à l'API pour avoir la liste des catégories
@@ -114,22 +55,24 @@ function chargeCategories() {
             listeCategories.value = json._embedded.categories;
             console.log(listeCategories)
         })
-        .catch((error) => {
-            console.log(error);
-        });
+        .catch(showError);
 }
 
-function chargeProduitsCategorie() {
-    if (selected.value) {
-        doAjaxRequest(`/api/categories/${selected.value}/produits?page=${page.value}&size=${taille.value}`)
-            .then((json) => {
-                listeProduits.value = json._embedded.produits;
-                nbpageTotales.value = json.page.totalPages;
-                pageactuelle.value = json.page.number;
-            })
-            .catch(showError);
-    }
+function chargeProduits() {
+    doAjaxRequest(`/api/categories/${selected.value}/produits`)
+        .then((json) => {
+            listeProduits.value = json._embedded.produits;
+            console.log(listeProduits)
+        })
+        .catch(showError);
 }
+
+
+
+function chargeProduitsCategorie() {
+    chargeProduits();
+}
+
 
 onMounted(chargeCategories);
 </script>
