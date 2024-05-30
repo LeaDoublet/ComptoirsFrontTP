@@ -2,13 +2,13 @@
     <main>
         <div>
             <h1> Les Categories de produits</h1>
-
         </div>
         <div>
             <select v-model="selected">
                 <option disabled value="">Choisissez une catégorie</option>
-                <option>A</option>
-                <option>B</option>
+                <option v-for="categorie in listeCategories" :key="categorie.code" :value="categorie.code">
+                    {{ categorie.libelle }}
+                </option>
             </select>
             <table>
                 <caption>Les produits</caption>
@@ -56,6 +56,8 @@ let nbpageTotales = ref([]);
 let pageactuelle = ref([]);
 let page = ref(0);
 let taille = ref(5);
+let listeCategories = ref([]);
+let selected = ref("");
 
 function chargeProduits() {
     doAjaxRequest("/api/produits?sort=nom,asc&page=" + page.value + "&size=" + taille.value)
@@ -95,7 +97,41 @@ function vaFin() {
     page.value = nbpageTotales.value - 1;
     chargeProduits();
 }
-onMounted(chargeProduits);
+
+// Pour réinitialiser le formulaire
+const categorieVide = {
+    libelle: "",
+    description: ""
+};
+
+
+function chargeCategories() {
+    // Appel à l'API pour avoir la liste des catégories
+    // Trié par code, descendant
+    // Verbe HTTP GET par défaut
+    doAjaxRequest("/api/categories?sort=code,desc")
+        .then((json) => {
+            listeCategories.value = json._embedded.categories;
+            console.log(listeCategories)
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function chargeProduitsCategorie() {
+    if (selected.value) {
+        doAjaxRequest(`/api/categories/${selected.value}/produits?page=${page.value}&size=${taille.value}`)
+            .then((json) => {
+                listeProduits.value = json._embedded.produits;
+                nbpageTotales.value = json.page.totalPages;
+                pageactuelle.value = json.page.number;
+            })
+            .catch(showError);
+    }
+}
+
+onMounted(chargeCategories);
 </script>
 <style scoped>
 td,
